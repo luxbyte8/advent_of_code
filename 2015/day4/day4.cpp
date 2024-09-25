@@ -33,6 +33,7 @@ void test(const string &filename)
     if(ifs.is_open()) {
         char buffer[512];
         // grab a chunk; in this case chunk of 512 bytes
+        // NOTE: within md5.update, we process 64 bytes at a time
         while(ifs.read(buffer, sizeof(buffer))) {
             md5.update(reinterpret_cast<uint8_t*>(buffer), ifs.gcount());
         }

@@ -19,10 +19,10 @@ MD5::~MD5()
 
 void MD5::update(const uint8_t *input, size_t len)
 {
-    // size_t offset = buffer.size();
     buffer.insert(buffer.end(), input, input + len);
     bit_len += len * 8; // len is in bytes so convert to bits
 
+    // process in 64 bytes chunks
     while(buffer.size() >= 64) {
         process(buffer.data());
         buffer.erase(buffer.begin(), buffer.begin() + 64);
@@ -31,17 +31,17 @@ void MD5::update(const uint8_t *input, size_t len)
 
 void MD5::finalize(vector<uint8_t> &digest)
 {
-    // pad 0 up to congruent 448 mod 512
-    // 448 = 56 bytes; either buffer is less than 56 and we pad up to 56
-    // 448 * 2 = 960 = 120 bytes; or buffer is more than 56 and we go up
+    // append 1 then pad 0 up to congruent 448 mod 512
+    // 512 - 64     = 448 = 56 bytes; buffer < 56 bytes, pad up to 56 bytes
+    // 512 * 2 - 64 = 960 = 120 bytes; buffer > 56 bytes, pad up to 120 bytes
     size_t pad_len = (buffer.size() < 56) ? (56 - buffer.size()) : (120 - buffer.size());
     vector<uint8_t> padding(pad_len, 0); // padding of zeros
-    padding[0] = 0x80;  // this appends 1 then the zeors
+    padding[0] = 0x80;  // insert 1 at the beginning since we have to append 1 then the zeros 
     buffer.insert(buffer.end(), padding.begin(), padding.end());
     uint64_t bit_len_LE = bit_len; // bit length; little endian
     buffer.insert(buffer.end(),
                   reinterpret_cast<uint8_t*>(&bit_len_LE),
-                  reinterpret_cast<uint8_t*>(&bit_len_LE) + 8);
+                  reinterpret_cast<uint8_t*>(&bit_len_LE) + 8); // bit_len_LE is 64 bits: 8 bytes
     while(buffer.size() >= 64) {
         process(buffer.data());
         buffer.erase(buffer.begin(), buffer.begin() + 64);
