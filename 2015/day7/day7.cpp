@@ -44,12 +44,11 @@ void part1(const string &filename)
     Cache.clear();
     Visited.clear();
     parse_input(filename);
-
     for(const auto &wire : Wires) {
         int signal = ((wire.second)().live) ? (wire.second)().signal : -1;
         cout << "w: " << wire.first << ", val: " << signal << endl;
     }
-}
+} // part1
 
 void part2(const string &filename)
 {
@@ -63,6 +62,7 @@ void part2(const string &filename)
     Wires["b"] = [=]() {
         return s;
     };
+    
     // clear cache so new values are computed
     Cache.clear();
     Visited.clear();
@@ -71,8 +71,7 @@ void part2(const string &filename)
         int signal = ((wire.second)().live) ? (wire.second)().signal : -1;
         cout << "w: " << wire.first << ", val: " << signal << endl;
     }
-
-} // part1
+} // part2
 
 void parse_input(const string &filename)
 {
@@ -88,11 +87,8 @@ void parse_input(const string &filename)
         istringstream iss(line);
         string src1, src2, op, arrow, dst;
         if(line.find("AND") != string::npos || line.find("OR") != string::npos || line.find("LSHIFT") != string::npos || line.find("RSHIFT") != string::npos) {
-            
-            // parse
             iss >> src1 >> op >> src2 >> arrow >> dst;
             // cout << "Processing: " << dst << " <- " << src1 << " " << op << " " << src2 << endl;
-
             if(op == "AND") {
                 Wires[dst] = [=]() {
                     Signal lhs = is_number(src1) ? Signal(stoi(src1), true) : get_signal(src1);
